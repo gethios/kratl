@@ -10,14 +10,13 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchImage(): Promise<void> {
+async function fetchImage(sequenceNumber: number): Promise<void> {
   const img = await fetch(IMG_URL);
 
-  const timestamp = +new Date();
-  console.log(`Fetched new image at ${timestamp}`);
+  console.log(`Fetched new image #${sequenceNumber}`);
 
   const imageBytes = new Uint8Array(await img.arrayBuffer());
-  await Deno.writeFile(`./images/image-${timestamp}.jpg`, imageBytes);
+  await Deno.writeFile(`./images/image${sequenceNumber}.jpg`, imageBytes);
 }
 
 const app = async () => {
@@ -31,12 +30,15 @@ const app = async () => {
     await sleep(sleepTime * SECONDS_HOUR * MILLISECOND_SECOND);
   }
 
+  let sequenceNumber = 1;
   while (true) {
     if (new Date().getHours() >= END_HOUR) {
       break;
     }
 
-    await fetchImage();
+    await fetchImage(sequenceNumber);
+    sequenceNumber += 1;
+
     await sleep(FETCH_INTERVAL);
   }
 };

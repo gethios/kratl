@@ -1,12 +1,14 @@
-﻿const IMG_URL = "https://www.fjordbat.no/webcam/mf_kragero.jpg";
+﻿import { logger } from "./log.ts";
+
+const IMG_URL = "https://www.fjordbat.no/webcam/mf_kragero.jpg";
 const FETCH_INTERVAL = 45000;
 
 const HOURS_DAY = 24;
 const SECONDS_HOUR = 3600;
 const MILLISECOND_SECOND = 1000;
 
-const START_HOUR = 6;
-const END_HOUR = 22;
+const START_HOUR = 5;
+const END_HOUR = 19;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -14,10 +16,7 @@ function sleep(ms: number) {
 
 async function fetchImage(sequenceNumber: number): Promise<void> {
   const num = `${sequenceNumber}`.padStart(4, "0");
-  const date = new Date();
-  console.log(
-    `[${date.toLocaleDateString()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}]: Fetched new image #${num}`,
-  );
+  logger.debug(`Fetched new image #${num}`);
 
   const img = await fetch(IMG_URL);
 
@@ -26,7 +25,7 @@ async function fetchImage(sequenceNumber: number): Promise<void> {
 }
 
 const app = async () => {
-  console.log(`Start fetching images from ${IMG_URL}`);
+  logger.debug(`Start fetching images from ${IMG_URL}`);
 
   const currentHour = new Date().getHours();
 
@@ -39,7 +38,7 @@ const app = async () => {
   }
 
   if (sleepTime != 0) {
-    console.log(`Sleeping for ${sleepTime} hours`);
+    logger.debug(`Sleeping for ${sleepTime} hours`);
     await sleep(sleepTime * SECONDS_HOUR * MILLISECOND_SECOND);
   }
 
@@ -52,7 +51,7 @@ const app = async () => {
     try {
       await fetchImage(sequenceNumber);
     } catch (error) {
-      console.dir(error);
+      logger.critical(error);
       continue;
     }
 
